@@ -4,11 +4,14 @@ from fastapi import APIRouter, Body
 
 router = APIRouter(prefix="/hotels", tags=["Отели"])
 
-hotels: list = [
-	{"id": 1, "title": "Sochi", "name": "name_Sochi"},
-	{"id": 2, "title": "Dubai", "name": "name_Dubai"},
-	{"id": 3, "title": "Sri-Lanka", "name": "name_Sri-Lanka"},
-	{"id": 4, "title": "Afghanistan", "name": "name_Afghanistan"},
+hotels = [
+	{"id": 1, "title": "Sochi", "name": "sochi"},
+	{"id": 2, "title": "Дубай", "name": "dubai"},
+	{"id": 3, "title": "Мальдивы", "name": "maldivi"},
+	{"id": 4, "title": "Геленджик", "name": "gelendzhik"},
+	{"id": 5, "title": "Москва", "name": "moscow"},
+	{"id": 6, "title": "Казань", "name": "kazan"},
+	{"id": 7, "title": "Санкт-Петербург", "name": "spb"},
 ]
 
 
@@ -16,14 +19,17 @@ hotels: list = [
 			summary="Получить отели",
 			description="Получить отели по ID, либо по полю 'title', либо все")
 def get_hotel(id: int | None = None,
-			  title: str | None = None ,
+			  title: str | None = None,
+			  page: int | None = 1,
+			  per_page: int | None = 3,
 			  ):
 	if id:
 		return [hotel for hotel in hotels if hotel["id"] == id]
 	elif title:
 		return [hotel for hotel in hotels if hotel["title"] == title]
 	else:
-		return hotels
+		start_hotel_number = (page - 1) * per_page
+		return hotels[start_hotel_number:start_hotel_number + per_page]
 
 
 @router.post("",
