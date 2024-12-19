@@ -1,6 +1,5 @@
-from typing import Optional
-
 from fastapi import APIRouter, Body
+from dependencies import PaginationDep
 
 router = APIRouter(prefix="/hotels", tags=["Отели"])
 
@@ -18,18 +17,17 @@ hotels = [
 @router.get("",
 			summary="Получить отели",
 			description="Получить отели по ID, либо по полю 'title', либо все")
-def get_hotel(id: int | None = None,
+def get_hotel(pagination: PaginationDep,
+			  id: int | None = None,
 			  title: str | None = None,
-			  page: int | None = 1,
-			  per_page: int | None = 3,
 			  ):
 	if id:
 		return [hotel for hotel in hotels if hotel["id"] == id]
 	elif title:
 		return [hotel for hotel in hotels if hotel["title"] == title]
 	else:
-		start_hotel_number = (page - 1) * per_page
-		return hotels[start_hotel_number:start_hotel_number + per_page]
+		start_hotel_number = (pagination.page - 1) * pagination.per_page
+		return hotels[start_hotel_number:][:start_hotel_number + pagination.per_page]
 
 
 @router.post("",
