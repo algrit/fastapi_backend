@@ -33,7 +33,23 @@ def get_hotel(pagination: PaginationDep,
 
 @router.post("",
 			 summary="Добавить отель")
-def add_hotel(hotel: Hotel):
+def add_hotel(hotel: Hotel = Body(openapi_examples={
+    "1": {
+        "summary": "Сочи",
+        "value": {
+            "title": "Отель Сочи 5 звезд у моря",
+            "name": "sochi_u_morya",
+        }
+    },
+    "2": {
+        "summary": "Дубай",
+        "value": {
+            "title": "Отель Дубай У фонтана",
+            "name": "dubai_fountain",
+        }
+    }
+}
+								  )):
 	new_hotel = dict(id=hotels[-1]["id"] + 1, title=hotel.title, name=hotel.name)
 	hotels.append(new_hotel)
 	return new_hotel
