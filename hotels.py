@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Body
+from schemas.hotels import Hotel
 from dependencies import PaginationDep
 
 router = APIRouter(prefix="/hotels", tags=["Отели"])
@@ -32,25 +33,20 @@ def get_hotel(pagination: PaginationDep,
 
 @router.post("",
 			 summary="Добавить отель")
-def add_hotel(title: str = Body(),
-			  name: str = Body(),
-			  ):
-	new_hotel = dict(id=hotels[-1]["id"] + 1, title=title, name=name)
+def add_hotel(hotel: Hotel):
+	new_hotel = dict(id=hotels[-1]["id"] + 1, title=hotel.title, name=hotel.name)
 	hotels.append(new_hotel)
 	return new_hotel
 
 
 @router.put("/{hotel_id}")
-def change_hotel_data(hotel_id: int,
-					  new_title: str = Body(),
-					  new_name: str = Body()
-					  ):
+def change_hotel_data(hotel_id: int, hotel: Hotel):
 	global hotels
-	for hotel in hotels:
-		if hotel["id"] == hotel_id:
-			hotel["title"] = new_title
-			hotel["name"] = new_name
-			return hotel
+	for hotel_ in hotels:
+		if hotel_["id"] == hotel_id:
+			hotel_["title"] = hotel.title
+			hotel_["name"] = hotel.name
+			return hotel_
 
 
 @router.patch("/{hotel_id}")
