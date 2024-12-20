@@ -12,36 +12,43 @@ router = APIRouter(prefix="/hotels", tags=["Отели"])
 @router.get("",
 			summary="Получить отели",
 			description="Получить отели по ID, либо по полю 'title', либо все")
-def get_hotel(pagination: PaginationDep,
-			  id: int | None = None,
-			  title: str | None = None,
-			  ):
-	if id:
-		return [hotel for hotel in hotels if hotel["id"] == id]
-	elif title:
-		return [hotel for hotel in hotels if hotel["title"] == title]
-	else:
-		start_hotel_number = (pagination.page - 1) * pagination.per_page
-		return hotels[start_hotel_number:][:start_hotel_number + pagination.per_page]
+async def get_hotel(pagination: PaginationDep,
+					id: int | None = None,
+					title: str | None = None,
+					):
+	per_page = pagination.per_page or 5
+	async with async_session_maker() as session:
+		query = select(HotelsORM)
+		if id:
+			query = query.filter_by(id=id)
+		if title:
+			query = query.filter_by(title=title)
+		query = (query
+				 .limit(per_page)
+				 .offset((pagination.page - 1) * per_page)
+				 )
+		# print(query.compile(async_engine, compile_kwargs={"literal_binds": True}))
+		res = await session.execute(query)
+		return res.scalars().all()
 
 
 @router.post("",
 			 summary="Добавить отель")
 async def add_hotel(hotel: Hotel = Body(openapi_examples={
-    "1": {
-        "summary": "Rome",
-        "value": {
-            "title": "Coliseum Five Stars",
-            "location": "Rome, Italy",
-        }
-    },
-    "2": {
-        "summary": "Cuba",
-        "value": {
-            "title": "Marina Resort Spa",
-            "location": "Varadero, Cuba",
-        }
-    }
+	"1": {
+		"summary": "Rome",
+		"value": {
+			"title": "Coliseum Five Stars",
+			"location": "Rome, Italy",
+		}
+	},
+	"2": {
+		"summary": "Cuba",
+		"value": {
+			"title": "Marina Resort Spa",
+			"location": "Varadero, Cuba",
+		}
+	}
 })):
 	async with async_session_maker() as session:
 		stmt = insert(HotelsORM).values(**hotel.model_dump())
