@@ -28,7 +28,6 @@ async def get_hotel(pagination: PaginationDep,
 		)
 
 
-
 @router.post("",
 			 summary="Добавить отель")
 async def add_hotel(hotel: Hotel = Body(openapi_examples={
@@ -48,11 +47,10 @@ async def add_hotel(hotel: Hotel = Body(openapi_examples={
 	}
 })):
 	async with async_session_maker() as session:
-		stmt = insert(HotelsORM).values(**hotel.model_dump())
-		# print(stmt.compile(async_engine, compile_kwargs={"literal_binds": True}))
-		await session.execute(stmt)
+		added_object = await HotelsRepository(session).add(title=hotel.title, location=hotel.location)
 		await session.commit()
-	return {"message": "insertion in DB complete correctly"}
+		# return {"message": "insertion in DB complete correctly"}
+		return {"status": "OK", "data": added_object}
 
 
 @router.put("/{hotel_id}")
