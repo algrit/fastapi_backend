@@ -2,6 +2,7 @@ from sqlalchemy import select, insert, literal_column
 
 from src.repositories.base import BaseRepository
 from src.models.hotels import HotelsORM
+from src.schemas.hotels import Hotel
 
 
 class HotelsRepository(BaseRepository):
@@ -24,8 +25,3 @@ class HotelsRepository(BaseRepository):
 				 )
 		result = await self.session.execute(query)
 		return result.scalars().all()
-
-	async def add(self, title, location):
-		stmt = insert(HotelsORM).values(title=title, location=location)
-		result = await self.session.execute(stmt)
-		return result.last_inserted_params()
