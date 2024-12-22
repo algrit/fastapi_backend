@@ -57,10 +57,9 @@ async def add_hotel(hotel_data: Hotel = Body(openapi_examples={
 @router.put("/{hotel_id}")
 async def hotel_edit(hotel_id: int, hotel: Hotel):
 	async with async_session_maker() as session:
-		edited_hotel = await HotelsRepository(session).edit(hotel_id, hotel)
+		await HotelsRepository(session).edit(hotel, id=hotel_id)
 		await session.commit()
-		return {"message": f"Hotel {edited_hotel.id} edited",
-				"new_data": (edited_hotel.title, edited_hotel.location)}
+		return {"message": "OK"}
 
 
 @router.patch("/{hotel_id}")
@@ -80,9 +79,9 @@ def change_hotel_field(hotel_id: int,
 			return hotel
 
 
-@router.delete("/delete/{hotel_id}")
+@router.delete("/{hotel_id}")
 async def hotel_delete(hotel_id: int):
 	async with async_session_maker() as session:
-		deleted_hotel = await HotelsRepository(session).delete(hotel_id)
+		await HotelsRepository(session).delete(id=hotel_id)
 		await session.commit()
-		return deleted_hotel
+		return {"message": "OK"}
