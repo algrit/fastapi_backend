@@ -7,6 +7,7 @@ from src.schemas.hotels import Hotel
 
 class HotelsRepository(BaseRepository):
 	model = HotelsORM
+	schema = Hotel
 
 	async def get_all(
 			self,
