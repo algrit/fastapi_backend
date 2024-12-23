@@ -1,12 +1,9 @@
 from fastapi import APIRouter, Body
 from sqlalchemy import insert, select
 
-from src.models.hotels import HotelsORM
-from src.repositories.base import BaseRepository
 from src.schemas.hotels import Hotel, HotelPatch, HotelAdd
 from src.api.dependencies import PaginationDep
 from src.database import async_engine, async_session_maker
-
 from src.repositories.hotels import HotelsRepository
 
 router = APIRouter(prefix="/hotels", tags=["Отели"])
