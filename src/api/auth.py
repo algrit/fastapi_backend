@@ -1,4 +1,4 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
 
 from passlib.context import CryptContext
 
@@ -15,6 +15,8 @@ async def register_user(data: UserAddRequest):
 	hashed_password = pwd_context.hash(data.password)
 	new_user_data = UserAdd(email=data.email, hashed_password=hashed_password)
 	async with async_session_maker() as session:
+		if await UsersRepository(session).get_one(email=data.email):
+			raise HTTPException(403, "This user already registered")
 		await UsersRepository(session).add(new_user_data)
 		await session.commit()
 	return {"message": "OK"}
