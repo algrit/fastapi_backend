@@ -3,7 +3,7 @@ from sqlalchemy import insert, select
 
 from src.models.hotels import HotelsORM
 from src.repositories.base import BaseRepository
-from src.schemas.hotels import Hotel
+from src.schemas.hotels import Hotel, HotelPatch
 from src.api.dependencies import PaginationDep
 from src.database import async_engine, async_session_maker
 
@@ -70,20 +70,10 @@ async def hotel_edit(hotel_id: int, hotel: Hotel):
 
 
 @router.patch("/{hotel_id}")
-def change_hotel_field(hotel_id: int,
-					   new_title: str | None = Body(),
-					   new_name: str | None = Body()
-					   ):
-	if not new_title and not new_name:
-		return {"message": "no new data"}
-	global hotels
-	for hotel in hotels:
-		if hotel["id"] == hotel_id:
-			if new_title:
-				hotel["title"] = new_title
-			if new_name:
-				hotel["name"] = new_name
-			return hotel
+async def change_hotel_field(hotel_id: int, hotel: HotelPatch):
+	async with async_session_maker() as session:
+		await HotelsRepository(session).edit(hotel, exclude_unset=True, id=hotel_id)
+		await session.commit()
 
 
 @router.delete("/{hotel_id}")
