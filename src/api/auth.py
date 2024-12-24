@@ -27,6 +27,10 @@ def create_access_token(data: dict, expires_delta: timedelta | None = None):
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
+def verify_password(plain_password, hashed_password):
+	return pwd_context.verify(plain_password, hashed_password)
+
+
 @router.post("/register")
 async def register_user(data: UserAddRequest):
 	hashed_password = pwd_context.hash(data.password)
@@ -43,6 +47,8 @@ async def login(data: UserAddRequest, response: Response):
 		user = await UsersRepository(session).get_one(email=data.email)
 		if not user:
 			raise HTTPException(401, "Нет такого пользователя")
+		if not verify_password(data.password, user.hashed_password):
+			raise HTTPException(401, "Неверный пароль")
 		access_token = create_access_token({"id": user.id})
 		response.set_cookie(key="access_token", value=access_token)
 	return {"access_token": access_token}
