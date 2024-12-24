@@ -38,3 +38,9 @@ async def login(data: UserAddRequest, response: Response):
 		access_token = AuthService().create_access_token({"id": user.id})
 		response.set_cookie(key="access_token", value=access_token)
 	return {"access_token": access_token}
+
+
+@router.get("/only_auth")
+def only_auth(request: Request):
+	access_token = request.cookies["access_token"]
+	return access_token + "trololo"
