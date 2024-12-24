@@ -41,7 +41,7 @@ async def register_user(data: UserAddRequest):
 	return {"message": "OK"}
 
 
-@router.post("login")
+@router.post("/login")
 async def login(data: UserAddRequest, response: Response):
 	async with async_session_maker() as session:
 		user = await UsersRepository(session).get_one(email=data.email)
