@@ -1,9 +1,8 @@
 from fastapi import APIRouter, Body
-from sqlalchemy import insert, select
 
-from src.schemas.hotels import Hotel, HotelPatch, HotelAdd
+from src.schemas.hotels import HotelPatch, HotelAdd
 from src.api.dependencies import PaginationDep
-from src.database import async_engine, async_session_maker
+from src.database import async_session_maker
 from src.repositories.hotels import HotelsRepository
 
 router = APIRouter(prefix="/hotels", tags=["Отели"])
@@ -12,7 +11,7 @@ router = APIRouter(prefix="/hotels", tags=["Отели"])
 @router.get("",
 			summary="Получить отели",
 			description="Получить отели по полю 'title', либо 'location', либо все")
-async def get_hotel(pagination: PaginationDep,
+async def get_hotels(pagination: PaginationDep,
 					title: str | None = None,
 					location: str | None = None,
 					):
@@ -52,7 +51,7 @@ async def add_hotel(hotel_data: HotelAdd = Body(openapi_examples={
 	}
 })):
 	async with async_session_maker() as session:
-		added_object = await HotelsRepository(session).add(hotel_data)
+		added_object = await HotelsRepository(session).add_one(hotel_data)
 		await session.commit()
 	# return {"message": "insertion in DB complete correctly"}
 	return {"status": "OK", "data": added_object}

@@ -14,7 +14,7 @@ async def register_user(data: UserAddRequest):
 	hashed_password = AuthService().hash_password(data.password)
 	new_user_data = UserAdd(email=data.email, hashed_password=hashed_password)
 	async with async_session_maker() as session:
-		await UsersRepository(session).add(new_user_data)
+		await UsersRepository(session).add_one(new_user_data)
 		await session.commit()
 	return {"message": "OK"}
 
