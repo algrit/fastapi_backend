@@ -1,20 +1,12 @@
-from fastapi import APIRouter, HTTPException, Response, Request
+from fastapi import APIRouter, HTTPException, Response, Depends
 
 from src.database import async_session_maker
 from src.repositories.users import UsersRepository
 from src.schemas.users import UserAddRequest, UserAdd, User
 from src.services.auth import AuthService
+from src.api.dependencies import UserIdDep
 
 router = APIRouter(prefix="/auth", tags=["Авторизация и аутентификация"])
-
-
-
-
-
-
-
-
-
 
 
 @router.post("/register")
@@ -35,12 +27,13 @@ async def login(data: UserAddRequest, response: Response):
 			raise HTTPException(401, "Нет такого пользователя")
 		if not AuthService().verify_password(data.password, user.hashed_password):
 			raise HTTPException(401, "Неверный пароль")
-		access_token = AuthService().create_access_token({"id": user.id})
+		access_token = AuthService().create_jwt_token({"id": user.id})
 		response.set_cookie(key="access_token", value=access_token)
 	return {"access_token": access_token}
 
 
-@router.get("/only_auth")
-def only_auth(request: Request):
-	access_token = request.cookies["access_token"]
-	return access_token + "trololo"
+@router.get("/me", summary="Получить ID текущего пользователя")
+async def get_me(user_id: UserIdDep):
+	async with async_session_maker() as session:
+		user = await UsersRepository(session).get_one(id=user_id)
+	return user
