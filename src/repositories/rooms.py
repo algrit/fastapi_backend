@@ -27,9 +27,3 @@ class RoomsRepository(BaseRepository):
             query = query.filter(RoomsOrm.price.__le__(price))
         rooms = await self.session.execute(query)
         return [Room.model_validate(room, from_attributes=True) for room in rooms.scalars().all()]
-
-    async def add_one(self, room_dict: dict):
-        add_room_stmt = insert(RoomsOrm).values(**room_dict).returning(RoomsOrm)
-        result = await self.session.execute(add_room_stmt)
-        room = result.scalars().one()
-        return Room.model_validate(room, from_attributes=True)

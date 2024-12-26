@@ -11,7 +11,7 @@ router = APIRouter(prefix="/hotels", tags=["Отели"])
 @router.get("",
 			summary="Получить отели",
 			description="Получить отели по полю 'title', либо 'location', либо все")
-async def get_hotels(pagination: PaginationDep,
+async def hotels_get(pagination: PaginationDep,
 					title: str | None = None,
 					location: str | None = None,
 					):
@@ -26,7 +26,7 @@ async def get_hotels(pagination: PaginationDep,
 
 
 @router.get("/{hotel_id}", summary="Получить отель по ID")
-async def get_hotel_by_id(hotel_id: int):
+async def hotel_get_by_id(hotel_id: int):
 	async with async_session_maker() as session:
 		hotel_obj = await HotelsRepository(session).get_one(id=hotel_id)
 		return hotel_obj
@@ -34,7 +34,7 @@ async def get_hotel_by_id(hotel_id: int):
 
 @router.post("",
 			 summary="Добавить отель")
-async def add_hotel(hotel_data: HotelAdd = Body(openapi_examples={
+async def hotel_add(hotel_data: HotelAdd = Body(openapi_examples={
 	"1": {
 		"summary": "Rome",
 		"value": {
@@ -51,14 +51,14 @@ async def add_hotel(hotel_data: HotelAdd = Body(openapi_examples={
 	}
 })):
 	async with async_session_maker() as session:
-		added_object = await HotelsRepository(session).add_one(hotel_data)
+		added_hotel = await HotelsRepository(session).add_one(hotel_data)
 		await session.commit()
 	# return {"message": "insertion in DB complete correctly"}
-	return {"status": "OK", "data": added_object}
+	return {"status": "OK", "data": added_hotel}
 
 
 @router.put("/{hotel_id}")
-async def hotel_edit(hotel_id: int, hotel: HotelAdd):
+async def hotel_put(hotel_id: int, hotel: HotelAdd):
 	async with async_session_maker() as session:
 		await HotelsRepository(session).edit(hotel, id=hotel_id)
 		await session.commit()
@@ -66,7 +66,7 @@ async def hotel_edit(hotel_id: int, hotel: HotelAdd):
 
 
 @router.patch("/{hotel_id}")
-async def change_hotel_field(hotel_id: int, hotel: HotelPatch):
+async def hotel_patch(hotel_id: int, hotel: HotelPatch):
 	async with async_session_maker() as session:
 		await HotelsRepository(session).edit(hotel, exclude_unset=True, id=hotel_id)
 		await session.commit()
