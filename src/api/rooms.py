@@ -17,14 +17,19 @@ async def rooms_get(
         quantity: int | None = None,
 ):
     async with async_session_maker() as session:
-        rooms = await RoomsRepository(session).get_all(
+        return await RoomsRepository(session).get_all(
             hotel_id=hotel_id,
             title=title,
             description=description,
             price=price,
             quantity=quantity,
         )
-    return rooms
+
+@router.get("/{hotel_id}/rooms/{room_id}", summary="Получить номер по ИД отеля и номера")
+async def room_get_by_id(hotel_id: int, room_id: int):
+    filter_by = {"hotel_id": hotel_id, "id": room_id}
+    async with async_session_maker() as session:
+        return await RoomsRepository(session).get_one(**filter_by)
 
 
 @router.post("/{hotel_id}/rooms", summary="Добавить номера в отель")
@@ -66,7 +71,7 @@ async def room_put(hotel_id: int,
     async with async_session_maker() as session:
         await RoomsRepository(session).edit(data, **filter_by)
         await session.commit()
-        return {"message": "OK"}
+    return {"message": "OK"}
 
 
 @router.patch("/{hotel_id}/rooms/{room_id}", summary="Изменить некоторые данные комнаты")
@@ -78,4 +83,13 @@ async def room_patch(hotel_id: int,
     async with async_session_maker() as session:
         await RoomsRepository(session).edit(data, exclude_unset=True, **filter_by)
         await session.commit()
-        return {"message": "OK"}
+    return {"message": "OK"}
+
+
+@router.delete("/{hotel_id}/rooms/{room_id}", summary="Удалить номер")
+async def room_delete(hotel_id: int, room_id: int):
+    filter_by = {"hotel_id": hotel_id, "id": room_id}
+    async with async_session_maker() as session:
+        await RoomsRepository(session).delete(**filter_by)
+        await session.commit()
+    return {"message": "OK"}

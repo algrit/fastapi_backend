@@ -39,7 +39,6 @@ class BaseRepository:
 	async def delete(self, **filter_by) -> None:
 		query = select(self.model).filter_by(**filter_by)
 		obj_amount = len((await self.session.execute(query)).scalars().all())
-		# obj_amount = len(obj_to_delete.scalars().all()))
 		if obj_amount == 0:
 			raise HTTPException(404, "No such object")
 		elif obj_amount > 1:

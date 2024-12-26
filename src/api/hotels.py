@@ -28,8 +28,7 @@ async def hotels_get(pagination: PaginationDep,
 @router.get("/{hotel_id}", summary="Получить отель по ID")
 async def hotel_get_by_id(hotel_id: int):
 	async with async_session_maker() as session:
-		hotel_obj = await HotelsRepository(session).get_one(id=hotel_id)
-		return hotel_obj
+		return await HotelsRepository(session).get_one(id=hotel_id)
 
 
 @router.post("",
@@ -53,7 +52,6 @@ async def hotel_add(hotel_data: HotelAdd = Body(openapi_examples={
 	async with async_session_maker() as session:
 		added_hotel = await HotelsRepository(session).add_one(hotel_data)
 		await session.commit()
-	# return {"message": "insertion in DB complete correctly"}
 	return {"status": "OK", "data": added_hotel}
 
 
@@ -62,7 +60,7 @@ async def hotel_put(hotel_id: int, hotel: HotelAdd):
 	async with async_session_maker() as session:
 		await HotelsRepository(session).edit(hotel, id=hotel_id)
 		await session.commit()
-		return {"message": "OK"}
+	return {"message": "OK"}
 
 
 @router.patch("/{hotel_id}")
@@ -70,6 +68,7 @@ async def hotel_patch(hotel_id: int, hotel: HotelPatch):
 	async with async_session_maker() as session:
 		await HotelsRepository(session).edit(hotel, exclude_unset=True, id=hotel_id)
 		await session.commit()
+	return {"message": "OK"}
 
 
 @router.delete("/{hotel_id}")
@@ -77,4 +76,4 @@ async def hotel_delete(hotel_id: int):
 	async with async_session_maker() as session:
 		await HotelsRepository(session).delete(id=hotel_id)
 		await session.commit()
-		return {"message": "OK"}
+	return {"message": "OK"}
