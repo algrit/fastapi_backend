@@ -28,9 +28,8 @@ class RoomsRepository(BaseRepository):
         rooms = await self.session.execute(query)
         return [Room.model_validate(room, from_attributes=True) for room in rooms.scalars().all()]
 
-    async def add_one(self, hotel_id: int, title: str, price, quantity):
-        add_room_stmt = insert(RoomsOrm).values(hotel_id=hotel_id, title=title, price=price,
-                                                quantity=quantity).returning(self.model)
+    async def add_one(self, room_dict: dict):
+        add_room_stmt = insert(RoomsOrm).values(**room_dict).returning(RoomsOrm)
         result = await self.session.execute(add_room_stmt)
         room = result.scalars().one()
         return Room.model_validate(room, from_attributes=True)
