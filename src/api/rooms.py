@@ -54,6 +54,7 @@ async def room_add(db: DBDep,
                    })):
     data_with_hotel = RoomAdd(hotel_id=hotel_id, **data.model_dump())
     added_room = await db.rooms.add_one(data_with_hotel)
+    await db.commit()
     return {"status": "OK", "data": added_room}
 
 
@@ -63,6 +64,7 @@ async def room_put(db: DBDep,
                    room_id: int,
                    data: RoomAddRequest):
     await db.rooms.edit(data, hotel_id=hotel_id, room_id=room_id)
+    await db.commit()
     return {"message": "OK"}
 
 
@@ -73,6 +75,7 @@ async def room_patch(db: DBDep,
                      data: RoomPatch
                      ):
     await db.rooms.edit(data, exclude_unset=True, hotel_id=hotel_id, room_id=room_id)
+    await db.commit()
     return {"message": "OK"}
 
 
@@ -82,4 +85,5 @@ async def room_delete(db: DBDep,
                       room_id: int):
     filter_by = {"hotel_id": hotel_id, "id": room_id}
     await db.rooms.delete(**filter_by)
+    await db.commit()
     return {"message": "OK"}

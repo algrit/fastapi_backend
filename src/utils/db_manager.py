@@ -14,6 +14,8 @@ class DBManager:
         self.hotels = HotelsRepository(self.session)
         self.rooms = RoomsRepository(self.session)
 
+        return self
+
     async def __aexit__(self, *args):
         self.session.rollback()
         self.session.close()

@@ -48,6 +48,7 @@ async def hotel_add(db: DBDep,
                         }
                     })):
     added_hotel = await db.hotels.add_one(hotel_data)
+    await db.commit()
     return {"status": "OK", "data": added_hotel}
 
 
@@ -56,6 +57,7 @@ async def hotel_put(db: DBDep,
                     hotel_id: int,
                     hotel: HotelAdd):
     await db.hotels.edit(hotel, id=hotel_id)
+    await db.commit()
     return {"message": "OK"}
 
 
@@ -64,10 +66,12 @@ async def hotel_patch(db: DBDep,
                       hotel_id: int,
                       hotel: HotelPatch):
     await db.hotels.edit(hotel, exclude_unset=True, id=hotel_id)
+    await db.commit()
     return {"message": "OK"}
 
 
 @router.delete("/{hotel_id}")
 async def hotel_delete(db: DBDep, hotel_id: int):
     await db.hotels.delete(id=hotel_id)
+    await db.commit()
     return {"message": "OK"}
