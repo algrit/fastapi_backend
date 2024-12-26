@@ -22,7 +22,7 @@ async def register_user(data: UserAddRequest):
 @router.post("/login")
 async def login(data: UserAddRequest, response: Response):
 	async with async_session_maker() as session:
-		user = await UsersRepository(session).get_one(email=data.email)
+		user = await UsersRepository(session).get_user_with_hashed_pass(email=data.email)
 		if not user:
 			raise HTTPException(401, "Нет такого пользователя")
 		if not AuthService().verify_password(data.password, user.hashed_password):
