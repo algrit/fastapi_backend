@@ -27,3 +27,22 @@ class RoomsRepository(BaseRepository):
             query = query.filter(RoomsOrm.price.__le__(price))
         rooms = await self.session.execute(query)
         return [Room.model_validate(room, from_attributes=True) for room in rooms.scalars().all()]
+
+
+    async def get_rooms_by_date(self, date_from, date_to):
+        """
+        with booked_rooms as (
+            select room_id, count(*) as booked_rooms_count
+            from bookings b
+            where date_from <= '2024-12-30' and date_to >= '2024-12-20'
+            group by room_id ),
+
+        rooms_left_table as (
+            select r.id, r.quantity - coalesce(booked_rooms.booked_rooms_count, 0) as rooms_left
+            from rooms r
+            left join booked_rooms on r.id = booked_rooms.room_id)
+
+        select * from rooms_left_table
+        where rooms_left > 0
+        """
+        pass
