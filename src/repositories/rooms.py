@@ -1,5 +1,7 @@
-from sqlalchemy import select, insert
+from sqlalchemy import select, func
 
+from src.database import async_engine
+from src.models.bookings import BookingsORM
 from src.models.rooms import RoomsOrm
 from src.repositories.base import BaseRepository
 from src.schemas.rooms import Room, RoomAdd
@@ -28,7 +30,6 @@ class RoomsRepository(BaseRepository):
         rooms = await self.session.execute(query)
         return [Room.model_validate(room, from_attributes=True) for room in rooms.scalars().all()]
 
-
     async def get_rooms_by_date(self, date_from, date_to):
         """
         with booked_rooms as (
@@ -45,4 +46,17 @@ class RoomsRepository(BaseRepository):
         select * from rooms_left_table
         where rooms_left > 0
         """
-        pass
+        booked_rooms_cte = (select(BookingsORM.room_id, func.count("*").label("booked_rooms_count"))
+                            .select_from(BookingsORM)
+                            .filter(BookingsORM.date_from <= date_to, BookingsORM.date_to >= date_from)
+                            .group_by(BookingsORM.room_id)
+                            ).cte(name="booked_rooms")
+        rooms_left_cte = (
+            select(RoomsOrm.id,
+                   (RoomsOrm.quantity - func.coalesce(booked_rooms_cte.c.booked_rooms_count, 0)).label("rooms_left"))
+            .select_from(RoomsOrm)
+            .outerjoin(booked_rooms_cte)
+        ).cte(name="rooms_left_table")
+
+        query = select(rooms_left_cte).filter(rooms_left_cte.c.rooms_left > 0)
+        # print(query.compile(bind=async_engine, compile_kwargs={"literal_binds": True}))
