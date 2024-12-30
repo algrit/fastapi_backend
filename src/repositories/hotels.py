@@ -26,6 +26,6 @@ class HotelsRepository(BaseRepository):
 			hotel_filters.append(HotelsORM.title.contains(title))
 		if location:
 			hotel_filters.append(HotelsORM.location.contains(location))
-		return await self.get_filtered(*hotel_filters)
+		return await self.get_filtered(*hotel_filters, limit=limit, offset=offset)
 
 
