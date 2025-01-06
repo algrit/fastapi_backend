@@ -60,7 +60,6 @@ async def room_add(db: DBDep,
     added_room = await db.rooms.add_one(data_with_hotel)
     if getattr(data, "features_ids", None):
         features_list = [RoomFeatureAdd(room_id=added_room.id, feature_id=f_id) for f_id in data.features_ids]
-        print(features_list)
         await db.room_features.add_bulk(features_list)
     await db.commit()
     return {"status": "OK", "data": added_room}
@@ -71,9 +70,15 @@ async def room_put(db: DBDep,
                    hotel_id: int,
                    room_id: int,
                    data: RoomAddRequest):
-    await db.rooms.edit(data, hotel_id=hotel_id, room_id=room_id)
+    room_data = data
+    delattr(room_data, "features_ids")
+    await db.rooms.edit(room_data, hotel_id=hotel_id, id=room_id)
+    # room_features = await db.room_features.get_filtered(room_id=room_id)
+    # features = [row.feature_id for row in room_features]
     await db.commit()
-    return {"message": "OK"}
+    return {"message": "OK",
+            # "features": features
+            }
 
 
 @router.patch("/{hotel_id}/rooms/{room_id}", summary="Изменить некоторые данные комнаты")
@@ -82,7 +87,7 @@ async def room_patch(db: DBDep,
                      room_id: int,
                      data: RoomPatch
                      ):
-    await db.rooms.edit(data, exclude_unset=True, hotel_id=hotel_id, room_id=room_id)
+    await db.rooms.edit(data, exclude_unset=True, hotel_id=hotel_id, id=room_id)
     await db.commit()
     return {"message": "OK"}
 
