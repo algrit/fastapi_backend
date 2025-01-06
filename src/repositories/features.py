@@ -1,8 +1,13 @@
-from src.models.features import FeaturesORM
+from src.models.features import FeaturesORM, RoomsFeaturesORM
 from src.repositories.base import BaseRepository
-from src.schemas.features import Features
+from src.schemas.features import Feature, RoomFeature
 
 
 class FeaturesRepository(BaseRepository):
     model = FeaturesORM
-    schema = Features
+    schema = Feature
+
+
+class RoomsFeaturesRepository(BaseRepository):
+    model = RoomsFeaturesORM
+    schema = RoomFeature
