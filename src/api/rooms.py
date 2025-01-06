@@ -70,14 +70,22 @@ async def room_put(db: DBDep,
                    hotel_id: int,
                    room_id: int,
                    data: RoomAddRequest):
-    room_data = data
-    delattr(room_data, "features_ids")
-    await db.rooms.edit(room_data, hotel_id=hotel_id, id=room_id)
-    # room_features = await db.room_features.get_filtered(room_id=room_id)
-    # features = [row.feature_id for row in room_features]
+    room_features = await db.room_features.get_filtered(room_id=room_id)
+    old_features = set([row.feature_id for row in room_features])  #2,3,4
+    new_features = set(data.features_ids) #5
+    features_to_delete = list(old_features.difference(new_features))
+    features_to_add = list(new_features.difference(old_features))
+    delattr(data, "features_ids")
+
+
+    await db.rooms.edit(data, hotel_id=hotel_id, id=room_id)
+    await db.room_features.delete_bulk(room_id, features_to_delete)
+    if features_to_add:
+        await db.room_features.add_bulk([RoomFeatureAdd(room_id=room_id, feature_id=f_id) for f_id in features_to_add])
     await db.commit()
     return {"message": "OK",
-            # "features": features
+            "features_to_delete": features_to_delete,
+            "features_to_add": features_to_add
             }
 
 
