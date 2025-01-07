@@ -29,3 +29,4 @@ class RoomPatch(BaseModel):
     description: Annotated[str | None, Body(None)]
     price: Annotated[int | None, Body(None)]
     quantity: Annotated[int | None, Body(None)]
+    features_ids: Annotated[list[int] | None, Body(None)]
