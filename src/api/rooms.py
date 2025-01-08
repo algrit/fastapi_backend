@@ -58,7 +58,7 @@ async def room_add(db: DBDep,
                        }})):
     data_with_hotel = RoomAdd(hotel_id=hotel_id, **data.model_dump())
     added_room = await db.rooms.add_one(data_with_hotel)
-    if getattr(data, "features_ids", None):
+    if data.features_ids:
         features_list = [RoomFeatureAdd(room_id=added_room.id, feature_id=f_id) for f_id in data.features_ids]
         await db.room_features.add_bulk(features_list)
     await db.commit()
@@ -70,21 +70,11 @@ async def room_put(db: DBDep,
                    hotel_id: int,
                    room_id: int,
                    data: RoomAddRequest):
-    room_features = await db.room_features.get_filtered(room_id=room_id)
-    old_features = set([row.feature_id for row in room_features])  #2,3,4
-    new_features = set(data.features_ids) #5
-    features_to_delete = list(old_features.difference(new_features))
-    features_to_add = list(new_features.difference(old_features))
-    delattr(data, "features_ids")
-    await db.rooms.edit(data, hotel_id=hotel_id, id=room_id)
-    await db.room_features.delete_bulk(room_id, features_to_delete)
-    if features_to_add:
-        await db.room_features.add_bulk([RoomFeatureAdd(room_id=room_id, feature_id=f_id) for f_id in features_to_add])
+    _room_data = RoomAdd(hotel_id=hotel_id, **data.model_dump())
+    await db.rooms.edit(_room_data, id=room_id)
+    await db.room_features.update_rooms_features(room_id, data.features_ids)
     await db.commit()
-    return {"message": "OK",
-            "features_to_delete": features_to_delete,
-            "features_to_add": features_to_add
-            }
+    return {"message": "OK"}
 
 
 @router.patch("/{hotel_id}/rooms/{room_id}", summary="Изменить некоторые данные комнаты")

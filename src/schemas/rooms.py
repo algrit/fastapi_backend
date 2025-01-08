@@ -1,6 +1,6 @@
 from typing import Annotated
 
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from fastapi import Body
 
 
@@ -9,7 +9,7 @@ class RoomAddRequest(BaseModel):
     description: str | None = None
     price: int
     quantity: int
-    features_ids: list[int] | None = None
+    features_ids: list[int] = []
 
 
 class RoomAdd(BaseModel):
@@ -18,10 +18,13 @@ class RoomAdd(BaseModel):
     description: str | None = None
     price: int
     quantity: int
+    features_ids: list[int] = []
 
 
 class Room(RoomAdd):
     id: int
+
+    model_config = ConfigDict(from_attributes=True)
 
 
 class RoomPatch(BaseModel):
