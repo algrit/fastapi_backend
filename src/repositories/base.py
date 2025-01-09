@@ -44,11 +44,7 @@ class BaseRepository:
         edit_data_stmt = (update(self.model)
                           .filter_by(**filter_by)
                           .values(**data.model_dump(exclude_unset=exclude_unset)))
-        try:
-            await self.session.execute(edit_data_stmt)
-        except CompileError:
-            pass
-
+        await self.session.execute(edit_data_stmt)
 
     async def delete(self, **filter_by) -> None:
         query = select(self.model).filter_by(**filter_by)

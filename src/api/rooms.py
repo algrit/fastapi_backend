@@ -70,6 +70,7 @@ async def room_put(db: DBDep,
                    hotel_id: int,
                    room_id: int,
                    data: RoomAddRequest):
+    # features_ids = data.features_ids
     _room_data = RoomAdd(hotel_id=hotel_id, **data.model_dump())
     await db.rooms.edit(_room_data, id=room_id)
     await db.room_features.update_rooms_features(room_id, data.features_ids)

@@ -18,7 +18,6 @@ class RoomAdd(BaseModel):
     description: str | None = None
     price: int
     quantity: int
-    features_ids: list[int] = []
 
 
 class Room(RoomAdd):

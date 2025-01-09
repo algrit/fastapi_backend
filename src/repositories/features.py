@@ -29,6 +29,6 @@ class RoomsFeaturesRepository(BaseRepository):
         if features_to_add:
             features_m2m_add_stmt = (
                 insert(RoomsFeaturesORM)
-                .values(*[{"room_id": room_id, "feature_id": f_id} for f_id in features_to_add])
+                .values([{"room_id": room_id, "feature_id": f_id} for f_id in features_to_add])
             )
             await self.session.execute(features_m2m_add_stmt)
