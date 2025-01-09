@@ -5,7 +5,7 @@ from src.models.bookings import BookingsORM
 from src.models.rooms import RoomsOrm
 
 
-async def get_rooms_ids_to_book(date_from: date, date_to: date, hotel_id: int | None = None):
+def get_rooms_ids_to_book(date_from: date, date_to: date, hotel_id: int | None = None):
     booked_rooms_cte = (
         select(BookingsORM.room_id, func.count("*").label("booked_rooms_count"))
         .select_from(BookingsORM)

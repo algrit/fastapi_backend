@@ -1,9 +1,10 @@
 from sqlalchemy import select, func
+from sqlalchemy.orm import selectinload, joinedload
 
-from src.repositories.utils import get_rooms_ids_to_book
-from src.models.rooms import RoomsOrm
 from src.repositories.base import BaseRepository
-from src.schemas.rooms import Room
+from src.models.rooms import RoomsOrm
+from src.repositories.utils import get_rooms_ids_to_book
+from src.schemas.rooms import Room, RoomWithRels
 
 
 class RoomsRepository(BaseRepository):
@@ -12,5 +13,10 @@ class RoomsRepository(BaseRepository):
 
 
     async def get_rooms_by_date(self, hotel_id, date_from, date_to):
-        rooms_ids_to_book = await get_rooms_ids_to_book(date_from, date_to, hotel_id)
-        return await self.get_filtered(RoomsOrm.id.in_(rooms_ids_to_book))
+        rooms_ids_to_book = get_rooms_ids_to_book(date_from, date_to, hotel_id)
+        query = (
+            select(self.model)
+            .options(selectinload(self.model.features))
+            .filter(RoomsOrm.id.in_(rooms_ids_to_book)))
+        result = await self.session.execute(query)
+        return [RoomWithRels.model_validate(model, from_attributes=True) for model in result.scalars().all()]

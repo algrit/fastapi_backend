@@ -3,6 +3,8 @@ from typing import Annotated
 from pydantic import BaseModel, ConfigDict
 from fastapi import Body
 
+from src.schemas.features import Feature
+
 
 class RoomAddRequest(BaseModel):
     title: str
@@ -22,6 +24,10 @@ class RoomAdd(BaseModel):
 
 class Room(RoomAdd):
     id: int
+
+
+class RoomWithRels(Room):
+    features: list[Feature]
 
 
 class RoomPatchRequest(BaseModel):
