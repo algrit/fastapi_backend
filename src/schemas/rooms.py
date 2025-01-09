@@ -9,7 +9,7 @@ class RoomAddRequest(BaseModel):
     description: str | None = None
     price: int
     quantity: int
-    features_ids: list[int] = []
+    features_ids: list[int] | list = []
 
 
 class RoomAdd(BaseModel):
@@ -23,12 +23,18 @@ class RoomAdd(BaseModel):
 class Room(RoomAdd):
     id: int
 
-    model_config = ConfigDict(from_attributes=True)
 
-
-class RoomPatch(BaseModel):
+class RoomPatchRequest(BaseModel):
     title: Annotated[str | None, Body(None)]
     description: Annotated[str | None, Body(None)]
     price: Annotated[int | None, Body(None)]
     quantity: Annotated[int | None, Body(None)]
     features_ids: Annotated[list[int] | None, Body(None)]
+
+
+class RoomPatch(BaseModel):
+    hotel_id: int
+    title: Annotated[str | None, Body(None)]
+    description: Annotated[str | None, Body(None)]
+    price: Annotated[int | None, Body(None)]
+    quantity: Annotated[int | None, Body(None)]
