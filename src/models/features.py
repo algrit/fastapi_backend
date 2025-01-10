@@ -10,7 +10,7 @@ class FeaturesORM(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     title: Mapped[str] = mapped_column(String(100))
 
-    rooms: Mapped[list["RoomsOrm"]] = relationship(
+    rooms: Mapped[list["RoomsORM"]] = relationship(
         back_populates="features",
         secondary="rooms_features"
     )

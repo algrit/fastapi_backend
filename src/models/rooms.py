@@ -3,7 +3,7 @@ from sqlalchemy import ForeignKey
 
 from src.database import Base
 
-class RoomsOrm(Base):
+class RoomsORM(Base):
 	__tablename__ = "rooms"
 
 	id: Mapped[int] = mapped_column(primary_key=True)

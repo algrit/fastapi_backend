@@ -3,7 +3,7 @@ from src.models.users import UsersORM
 from src.models.bookings import BookingsORM
 from src.models.features import FeaturesORM
 from src.models.hotels import HotelsORM
-from src.models.rooms import RoomsOrm
+from src.models.rooms import RoomsORM
 from src.schemas.users import User, UserWithHashedPass
 from src.schemas.bookings import Booking
 from src.schemas.features import Feature
@@ -27,12 +27,12 @@ class HotelDataMapper(DataMapper):
 
 
 class RoomDataMapper(DataMapper):
-    db_model = RoomsOrm
+    db_model = RoomsORM
     schema = Room
 
 
 class RoomWithRelsDataMapper(DataMapper):
-    db_model = RoomsOrm
+    db_model = RoomsORM
     schema = RoomWithRels
 
 

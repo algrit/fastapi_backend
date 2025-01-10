@@ -1,6 +1,6 @@
 from sqlalchemy import select
 
-from src.models.rooms import RoomsOrm
+from src.models.rooms import RoomsORM
 from src.repositories.base import BaseRepository
 from src.repositories.mappers.mappers import HotelDataMapper
 from src.repositories.utils import get_rooms_ids_to_book
@@ -20,7 +20,7 @@ class HotelsRepository(BaseRepository):
             limit,
             offset):
         rooms_ids_to_book = get_rooms_ids_to_book(date_from, date_to)
-        hotels_ids_to_book = select(RoomsOrm.hotel_id).filter(RoomsOrm.id.in_(rooms_ids_to_book))
+        hotels_ids_to_book = select(RoomsORM.hotel_id).filter(RoomsORM.id.in_(rooms_ids_to_book))
         hotel_filters = [HotelsORM.id.in_(hotels_ids_to_book)]
         if title:
             hotel_filters.append(HotelsORM.title.contains(title))
