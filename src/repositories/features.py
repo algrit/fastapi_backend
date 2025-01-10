@@ -2,17 +2,16 @@ from sqlalchemy import select, insert, delete
 
 from src.models.features import FeaturesORM, RoomsFeaturesORM
 from src.repositories.base import BaseRepository
-from src.schemas.features import Feature, RoomFeature
+from src.repositories.mappers.mappers import FeatureDataMapper
 
 
 class FeaturesRepository(BaseRepository):
     model = FeaturesORM
-    schema = Feature
+    mapper = FeatureDataMapper
 
 
 class RoomsFeaturesRepository(BaseRepository):
     model = RoomsFeaturesORM
-    schema = RoomFeature
 
     async def update_rooms_features(self, room_id: int, new_features: list[int]):
         query = select(RoomsFeaturesORM.feature_id).filter_by(room_id=room_id)
