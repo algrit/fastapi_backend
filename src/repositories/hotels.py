@@ -19,7 +19,7 @@ class HotelsRepository(BaseRepository):
             location,
             limit,
             offset):
-        rooms_ids_to_book = await get_rooms_ids_to_book(date_from, date_to)
+        rooms_ids_to_book = get_rooms_ids_to_book(date_from, date_to)
         hotels_ids_to_book = select(RoomsOrm.hotel_id).filter(RoomsOrm.id.in_(rooms_ids_to_book))
         hotel_filters = [HotelsORM.id.in_(hotels_ids_to_book)]
         if title:
