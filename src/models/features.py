@@ -5,7 +5,6 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.database import Base
 
-
 pk_int = Annotated[int, mapped_column(primary_key=True)]
 
 class FeaturesORM(Base):
