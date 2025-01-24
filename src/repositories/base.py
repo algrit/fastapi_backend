@@ -1,7 +1,6 @@
 from fastapi import HTTPException
 
 from sqlalchemy import select, insert, update, delete
-from sqlalchemy.exc import CompileError
 from pydantic import BaseModel
 
 
