@@ -7,4 +7,5 @@ async def test_hotel_add():
     hotel_data = HotelAdd(title="Valmer Resort", location="Mahe, Seychellas")
     async with DBManager(session_factory=async_session_maker) as db:
         new_hotel = await db.hotels.add_one(hotel_data)
+        await db.commit()
         print(f"{new_hotel=}")
