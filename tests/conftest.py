@@ -2,6 +2,7 @@ import json
 
 import pytest
 from httpx import AsyncClient, ASGITransport
+from sqlalchemy import True_
 
 from src.config import settings
 from src.database import Base, engine_null_pool, async_session_maker_null_pool
@@ -15,6 +16,12 @@ from src.utils.db_manager import DBManager
 @pytest.fixture(scope="session", autouse=True)
 async def check_mode():
     assert settings.MODE == "TEST"
+
+
+@pytest.fixture(scope="function", autouse=True)
+async def db():
+    async with DBManager(session_factory=async_session_maker_null_pool) as db:
+        yield db
 
 
 @pytest.fixture(scope="session", autouse=True)
@@ -34,20 +41,23 @@ async def mock_hotels_and_rooms(setup_db):
     hotels_list = [HotelAdd.model_validate(h) for h in hotels_json]
     rooms_list = [RoomAdd.model_validate(r) for r in rooms_json]
 
-    async with DBManager(session_factory=async_session_maker_null_pool) as db:
-        await db.hotels.add_bulk(hotels_list)
-        await db.rooms.add_bulk(rooms_list)
-        await db.commit()
+    async with DBManager(session_factory=async_session_maker_null_pool) as db_:
+        await db_.hotels.add_bulk(hotels_list)
+        await db_.rooms.add_bulk(rooms_list)
+        await db_.commit()
+
+
+@pytest.fixture(scope="session")
+async def ac():
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
+        yield ac
 
 
 @pytest.fixture(scope="session", autouse=True)
-async def register_user(setup_db):
-    async with AsyncClient(
-            transport=ASGITransport(app=app), base_url="http://test"
-    ) as ac:
-        await ac.post(
-            "/auth/register",
-            json={
-                "email": "OmTheCat@CAT.cat",
-                "password": "qwerty"
-            })
+async def register_user(setup_db, ac):
+    await ac.post(
+        "/auth/register",
+        json={
+            "email": "OmTheCat@CAT.cat",
+            "password": "qwerty"
+        })
