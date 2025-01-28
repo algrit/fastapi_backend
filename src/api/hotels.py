@@ -14,8 +14,8 @@ router = APIRouter(prefix="/hotels", tags=["Отели"])
 @cache(expire=10)
 async def hotels_get_by_date(db: DBDep,
                              pagination: PaginationDep,
-                             date_from: date = Query(example="2024-12-20"),
-                             date_to: date = Query(example="2024-12-30"),
+                             date_from: date = Query(examples=["2024-12-20"]),
+                             date_to: date = Query(examples=["2024-12-30"]),
                              title: str | None = None,
                              location: str | None = None,
                              ):
