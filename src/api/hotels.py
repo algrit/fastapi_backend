@@ -11,7 +11,7 @@ router = APIRouter(prefix="/hotels", tags=["Отели"])
 @router.get("",
             summary="Получить свободные отели по дате",
             description="Получить отели по полю 'title', либо 'location', либо все")
-@cache(expire=10)
+# @cache(expire=10)
 async def hotels_get_by_date(db: DBDep,
                              pagination: PaginationDep,
                              date_from: date = Query(examples=["2024-12-20"]),

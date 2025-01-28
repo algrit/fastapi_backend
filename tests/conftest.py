@@ -1,8 +1,10 @@
 import json
 
 import pytest
+from fastapi import FastAPI
 from httpx import AsyncClient, ASGITransport
 
+from src.api.dependencies import get_db
 from src.config import settings
 from src.database import Base, engine_null_pool, async_session_maker_null_pool
 from src.main import app
@@ -17,9 +19,17 @@ async def check_mode():
     assert settings.MODE == "TEST"
 
 
+async def get_null_pool_session():
+    async with DBManager(session_factory=async_session_maker_null_pool) as db:
+        yield db
+
+
+app.dependency_overrides[get_db] = get_null_pool_session
+
+
 @pytest.fixture(scope="function", autouse=True)
 async def db():
-    async with DBManager(session_factory=async_session_maker_null_pool) as db:
+    async for db in get_null_pool_session():
         yield db
 
 
