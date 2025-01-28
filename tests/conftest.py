@@ -33,8 +33,6 @@ async def mock_hotels_and_rooms(setup_db):
 
     hotels_list = [HotelAdd.model_validate(h) for h in hotels_json]
     rooms_list = [RoomAdd.model_validate(r) for r in rooms_json]
-    print(hotels_list)
-    print([type(i) for i in hotels_list])
 
     async with DBManager(session_factory=async_session_maker_null_pool) as db:
         await db.hotels.add_bulk(hotels_list)
