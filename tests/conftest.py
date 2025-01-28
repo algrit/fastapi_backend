@@ -2,13 +2,14 @@ import json
 
 import pytest
 from httpx import AsyncClient, ASGITransport
-from sqlalchemy import text
 
 from src.config import settings
-from src.database import Base, engine_null_pool, async_session_maker_null_pool, async_session_maker
+from src.database import Base, engine_null_pool, async_session_maker_null_pool
 from src.main import app
 from src.models import *
 from src.schemas.hotels import HotelAdd
+from src.schemas.rooms import RoomAdd
+from src.utils.db_manager import DBManager
 
 
 @pytest.fixture(scope="session", autouse=True)
@@ -25,21 +26,20 @@ async def setup_db(check_mode):
 
 @pytest.fixture(scope="session", autouse=True)
 async def mock_hotels_and_rooms(setup_db):
-    mock_hotels = open("tests/mock_hotels.json", "r")
-    hotels_json = json.load(mock_hotels)
-    mock_rooms = open("tests/mock_rooms.json", "r")
-    rooms_json = json.load(mock_rooms)
-    async with async_session_maker() as session:
-        hotels_list = [HotelsORM(title=h["title"], location=h["location"]) for h in hotels_json]
-        session.add_all(hotels_list)
-        await session.flush()
-        rooms_list = [RoomsORM(hotel_id=r["hotel_id"],
-                               title=r["title"],
-                               description=r["description"],
-                               price=r["price"],
-                               quantity=r["quantity"]) for r in rooms_json]
-        session.add_all(rooms_list)
-        await session.commit()
+    with open("tests/mock_hotels.json", encoding="utf-8") as file_hotels:
+        hotels_json = json.load(file_hotels)
+    with open("tests/mock_rooms.json", encoding="utf-8") as file_rooms:
+        rooms_json = json.load(file_rooms)
+
+    hotels_list = [HotelAdd.model_validate(h) for h in hotels_json]
+    rooms_list = [RoomAdd.model_validate(r) for r in rooms_json]
+    print(hotels_list)
+    print([type(i) for i in hotels_list])
+
+    async with DBManager(session_factory=async_session_maker_null_pool) as db:
+        await db.hotels.add_bulk(hotels_list)
+        await db.rooms.add_bulk(rooms_list)
+        await db.commit()
 
 
 @pytest.fixture(scope="session", autouse=True)
