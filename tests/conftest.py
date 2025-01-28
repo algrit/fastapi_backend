@@ -2,7 +2,6 @@ import json
 
 import pytest
 from httpx import AsyncClient, ASGITransport
-from sqlalchemy import True_
 
 from src.config import settings
 from src.database import Base, engine_null_pool, async_session_maker_null_pool
