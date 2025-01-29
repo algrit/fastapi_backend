@@ -1,8 +1,10 @@
 import json
 
 import pytest
-from fastapi import FastAPI
 from httpx import AsyncClient, ASGITransport
+from unittest import mock
+
+mock.patch("fastapi_cache.decorator.cache", lambda *args, **kwargs: lambda f: f).start()
 
 from src.api.dependencies import get_db
 from src.config import settings
@@ -70,3 +72,14 @@ async def register_user(setup_db, ac):
             "email": "OmTheCat@CAT.cat",
             "password": "qwerty"
         })
+
+
+@pytest.fixture(scope="session", autouse=True)
+async def authenticated_ac(ac, register_user):
+    response = await ac.post(
+        "/auth/login",
+        json={
+            "email": "OmTheCat@CAT.cat",
+            "password": "qwerty"
+        })
+    return response.cookies.get('access_token')
