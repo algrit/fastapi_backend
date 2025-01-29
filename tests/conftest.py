@@ -82,4 +82,9 @@ async def authenticated_ac(ac, register_user):
             "email": "OmTheCat@CAT.cat",
             "password": "qwerty"
         })
-    return response.cookies.get('access_token')
+    async with AsyncClient(
+            transport=ASGITransport(app=app),
+            base_url="http://test",
+            cookies=response.cookies,
+    ) as authenticated_ac:
+        yield authenticated_ac
