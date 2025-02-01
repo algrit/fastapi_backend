@@ -74,7 +74,7 @@ async def register_user(setup_db, ac):
         })
 
 
-@pytest.fixture(scope="session", autouse=True)
+@pytest.fixture(scope="session")
 async def authenticated_ac(ac, register_user):
     response = await ac.post(
         "/auth/login",
@@ -82,9 +82,5 @@ async def authenticated_ac(ac, register_user):
             "email": "OmTheCat@CAT.cat",
             "password": "qwerty"
         })
-    async with AsyncClient(
-            transport=ASGITransport(app=app),
-            base_url="http://test",
-            cookies=response.cookies,
-    ) as authenticated_ac:
-        yield authenticated_ac
+    assert ac.cookies["access_token"]
+    yield ac
