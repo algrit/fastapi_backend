@@ -13,17 +13,17 @@ async def test_booking_crud(db):
         date_to=date(year=2025, month=2, day=9),
         price=100
     ))
-    found_booking = await db.bookings.get_one(user_id=user_id, room_id=room_id)
+    found_booking = await db.bookings.get_one(id=added_booking.id)
     assert added_booking == found_booking
 
     booking_to_edit = found_booking
     booking_to_edit.price = 200
-    await db.bookings.edit(booking_to_edit, id=found_booking.id)
+    await db.bookings.edit(booking_to_edit, id=added_booking.id)
     edited_booking = await db.bookings.get_one(id=found_booking.id)
     assert edited_booking.price == 200
 
-    await db.bookings.delete(id=edited_booking.id)
-    empty_list = await db.bookings.get_all()
-    assert empty_list == []
+    await db.bookings.delete(id=found_booking.id)
+    deleted_booking = await db.bookings.get_one(id=found_booking.id)
+    assert not deleted_booking
 
     await db.commit()
