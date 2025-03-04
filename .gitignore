@@ -2,4 +2,5 @@ venv
 .idea
 __pycache__
 .env
+.test.env
 src/static/images/
