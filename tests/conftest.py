@@ -18,12 +18,12 @@ from src.utils.db_manager import DBManager
 
 @pytest.fixture(scope="session", autouse=True)
 async def check_mode():
-    assert settings.MODE == "TEST"
+	assert settings.MODE == "TEST"
 
 
 async def get_null_pool_session():
-    async with DBManager(session_factory=async_session_maker_null_pool) as db:
-        yield db
+	async with DBManager(session_factory=async_session_maker_null_pool) as db:
+		yield db
 
 
 app.dependency_overrides[get_db] = get_null_pool_session
@@ -31,56 +31,58 @@ app.dependency_overrides[get_db] = get_null_pool_session
 
 @pytest.fixture(scope="function", autouse=True)
 async def db():
-    async for db in get_null_pool_session():
-        yield db
+	async for db in get_null_pool_session():
+		yield db
 
 
 @pytest.fixture(scope="session", autouse=True)
 async def setup_db(check_mode):
-    async with engine_null_pool.begin() as conn:
-        await conn.run_sync(Base.metadata.drop_all)
-        await conn.run_sync(Base.metadata.create_all)
+	async with engine_null_pool.begin() as conn:
+		await conn.run_sync(Base.metadata.drop_all)
+
+
+# await conn.run_sync(Base.metadata.create_all)
 
 
 @pytest.fixture(scope="session", autouse=True)
 async def mock_hotels_and_rooms(setup_db):
-    with open("tests/mock_hotels.json", encoding="utf-8") as file_hotels:
-        hotels_json = json.load(file_hotels)
-    with open("tests/mock_rooms.json", encoding="utf-8") as file_rooms:
-        rooms_json = json.load(file_rooms)
+	with open("tests/mock_hotels.json", encoding="utf-8") as file_hotels:
+		hotels_json = json.load(file_hotels)
+	with open("tests/mock_rooms.json", encoding="utf-8") as file_rooms:
+		rooms_json = json.load(file_rooms)
 
-    hotels_list = [HotelAdd.model_validate(h) for h in hotels_json]
-    rooms_list = [RoomAdd.model_validate(r) for r in rooms_json]
+	hotels_list = [HotelAdd.model_validate(h) for h in hotels_json]
+	rooms_list = [RoomAdd.model_validate(r) for r in rooms_json]
 
-    async with DBManager(session_factory=async_session_maker_null_pool) as db_:
-        await db_.hotels.add_bulk(hotels_list)
-        await db_.rooms.add_bulk(rooms_list)
-        await db_.commit()
+	async with DBManager(session_factory=async_session_maker_null_pool) as db_:
+		await db_.hotels.add_bulk(hotels_list)
+		await db_.rooms.add_bulk(rooms_list)
+		await db_.commit()
 
 
 @pytest.fixture(scope="session")
 async def ac():
-    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
-        yield ac
+	async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
+		yield ac
 
 
 @pytest.fixture(scope="session", autouse=True)
 async def register_user(setup_db, ac):
-    await ac.post(
-        "/auth/register",
-        json={
-            "email": "OmTheCat@CAT.cat",
-            "password": "qwerty"
-        })
+	await ac.post(
+		"/auth/register",
+		json={
+			"email": "OmTheCat@CAT.cat",
+			"password": "qwerty"
+		})
 
 
 @pytest.fixture(scope="session")
 async def authenticated_ac(ac, register_user):
-    response = await ac.post(
-        "/auth/login",
-        json={
-            "email": "OmTheCat@CAT.cat",
-            "password": "qwerty"
-        })
-    assert ac.cookies["access_token"]
-    yield ac
+	response = await ac.post(
+		"/auth/login",
+		json={
+			"email": "OmTheCat@CAT.cat",
+			"password": "qwerty"
+		})
+	assert ac.cookies["access_token"]
+	yield ac

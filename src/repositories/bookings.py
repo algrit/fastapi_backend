@@ -18,7 +18,6 @@ class BookingsRepository(BaseRepository):
         res = await self.session.execute(query)
         return [self.mapper.map_to_domain_entity(model) for model in res.scalars().all()]
 
-
     async def add_booking(self, booking: BookingAdd):
         room_id = booking.room_id
         query = get_rooms_ids_to_book(date_from=booking.date_from, date_to=booking.date_to)

@@ -3,6 +3,7 @@ from sqlalchemy import ForeignKey
 
 from src.database import Base
 
+
 class RoomsORM(Base):
 	__tablename__ = "rooms"
 
