@@ -39,9 +39,7 @@ async def db():
 async def setup_db(check_mode):
 	async with engine_null_pool.begin() as conn:
 		await conn.run_sync(Base.metadata.drop_all)
-
-
-# await conn.run_sync(Base.metadata.create_all)
+		await conn.run_sync(Base.metadata.create_all)
 
 
 @pytest.fixture(scope="session", autouse=True)
