@@ -1,7 +1,7 @@
 from datetime import date
 from sqlalchemy import select
-from fastapi import HTTPException
 
+from src.exceptions import NoFreeRoomsException
 from src.models.bookings import BookingsORM
 from src.repositories.base import BaseRepository
 from src.repositories.mappers.mappers import BookingDataMapper
@@ -23,6 +23,6 @@ class BookingsRepository(BaseRepository):
         query = get_rooms_ids_to_book(date_from=booking.date_from, date_to=booking.date_to)
         rooms_ids_to_book = (await self.session.execute(query)).scalars().all()
         if room_id not in rooms_ids_to_book:
-            raise HTTPException(400, "Can't book this room. No free rooms for these dates")
+            raise NoFreeRoomsException
         else:
             return await self.add_one(booking)

@@ -1,6 +1,7 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
 
 from src.api.dependencies import DBDep, UserIdDep
+from src.exceptions import NoFreeRoomsException
 from src.schemas.bookings import BookingAddRequest, BookingAdd
 
 router = APIRouter(prefix="/bookings", tags=["Бронирования"])
@@ -10,7 +11,10 @@ router = APIRouter(prefix="/bookings", tags=["Бронирования"])
 async def booking_add(db: DBDep, user_id: UserIdDep, data: BookingAddRequest):
     room = await db.rooms.get_one(id=data.room_id)
     booking = BookingAdd(user_id=user_id, price=room.price, **data.model_dump())
-    added_booking = await db.bookings.add_booking(booking)
+    try:
+        added_booking = await db.bookings.add_booking(booking)
+    except NoFreeRoomsException:
+        raise HTTPException(400, "Can't book this room. No free rooms for these dates")
     await db.commit()
     return {"status": "OK", "data": added_booking}
 

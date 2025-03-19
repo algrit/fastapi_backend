@@ -20,7 +20,6 @@ async def test_booking_add(db, authenticated_ac, room_id, date_from, date_to, st
 async def clean_bookings(db, authenticated_ac):
 	response = await authenticated_ac.get("/bookings/me")
 	for booking in response.json():
-		print(booking)
 		response = await authenticated_ac.delete(f"/bookings/me/delete/{booking['id']}")
 		assert response.status_code == 200
 
