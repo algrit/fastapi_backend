@@ -1,6 +1,6 @@
 from typing import Annotated
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel
 from fastapi import Body
 
 from src.schemas.features import Feature
