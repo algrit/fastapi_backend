@@ -1,5 +1,5 @@
 from datetime import date
-from fastapi import APIRouter, Body, Query
+from fastapi import APIRouter, Body, Query, HTTPException
 from fastapi_cache.decorator import cache
 
 from src.schemas.hotels import HotelPatch, HotelAdd
@@ -23,6 +23,8 @@ async def hotels_get_by_date(
     location: str | None = None,
 ):
     per_page = pagination.per_page or 5
+    if date_from >= date_to:
+        raise HTTPException(409, "'Date to' must be bigger than 'Date from'")
     return await db.hotels.get_hotels_by_date(
         date_from=date_from,
         date_to=date_to,
@@ -35,7 +37,10 @@ async def hotels_get_by_date(
 
 @router.get("/{hotel_id}", summary="Получить отель по ID")
 async def hotel_get_by_id(db: DBDep, hotel_id: int):
-    return await db.hotels.get_one(id=hotel_id)
+    hotel = await db.hotels.get_one(id=hotel_id)
+    if hotel:
+        return hotel
+    raise HTTPException(404, "No hotel with such ID")
 
 
 @router.post("", summary="Добавить отель")

@@ -1,5 +1,6 @@
 from fastapi import APIRouter, HTTPException, Response, Body
 
+from src.exceptions import DBException
 from src.schemas.users import UserAddRequest, UserAdd
 from src.services.auth import AuthService
 from src.api.dependencies import UserIdDep, DBDep
@@ -11,37 +12,40 @@ router = APIRouter(prefix="/auth", tags=["Авторизация и аутент
 async def register_user(data: UserAddRequest, db: DBDep):
     hashed_password = AuthService().hash_password(data.password)
     new_user_data = UserAdd(email=data.email, hashed_password=hashed_password)
-    await db.users.add_one(new_user_data)
+    try:
+        await db.users.add_one(new_user_data)
+    except DBException:
+        raise HTTPException(409, "Already has this user. Use another email")
     await db.commit()
     return {"message": "OK"}
 
 
 @router.post("/login")
 async def login(
-    db: DBDep,
-    response: Response,
-    data: UserAddRequest = Body(
-        openapi_examples={
-            "1": {
-                "summary": "algri",
-                "value": {
-                    "email": "algri@example.com",
-                    "password": "2204",
+        db: DBDep,
+        response: Response,
+        data: UserAddRequest = Body(
+            openapi_examples={
+                "1": {
+                    "summary": "algri",
+                    "value": {
+                        "email": "algri@example.com",
+                        "password": "2204",
+                    },
                 },
-            },
-            "2": {
-                "summary": "mama",
-                "value": {
-                    "email": "mama@example.com",
-                    "password": "123",
+                "2": {
+                    "summary": "mama",
+                    "value": {
+                        "email": "mama@example.com",
+                        "password": "123",
+                    },
                 },
-            },
-        }
-    ),
+            }
+        ),
 ):
     user = await db.users.get_user_with_hashed_pass(email=data.email)
     if not user:
-        raise HTTPException(401, "Нет такого пользователя")
+        raise HTTPException(404, "Нет такого пользователя")
     if not AuthService().verify_password(data.password, user.hashed_password):
         raise HTTPException(401, "Неверный пароль")
     access_token = AuthService().create_jwt_token({"id": user.id})

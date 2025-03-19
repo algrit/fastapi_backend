@@ -1,7 +1,8 @@
-from fastapi import HTTPException
-
 from sqlalchemy import select, insert, update, delete
+from sqlalchemy.exc import IntegrityError
 from pydantic import BaseModel
+
+from src.exceptions import DBException, ObjectNotFoundException
 
 
 class BaseRepository:
@@ -12,7 +13,7 @@ class BaseRepository:
         self.session = session
 
     async def get_filtered(
-        self, *filter, limit: int | None = None, offset: int | None = None, **filter_by
+            self, *filter, limit: int | None = None, offset: int | None = None, **filter_by
     ):
         query = select(self.model).filter(*filter).filter_by(**filter_by)
         if limit:
@@ -33,7 +34,10 @@ class BaseRepository:
 
     async def add_one(self, data: BaseModel):
         add_data_stmt = insert(self.model).values(**data.model_dump()).returning(self.model)
-        result = await self.session.execute(add_data_stmt)
+        try:
+            result = await self.session.execute(add_data_stmt)
+        except IntegrityError:
+            raise DBException
         model = result.scalars().one()
         return self.mapper.map_to_domain_entity(model)
 
@@ -42,6 +46,9 @@ class BaseRepository:
         await self.session.execute(add_data_stmt)
 
     async def edit(self, data: BaseModel, exclude_unset=False, **filter_by) -> None:
+        model = await self.get_one(**filter_by)
+        if not model:
+            raise ObjectNotFoundException
         edit_data_stmt = (
             update(self.model)
             .filter_by(**filter_by)
@@ -53,8 +60,6 @@ class BaseRepository:
         query = select(self.model).filter_by(**filter_by)
         obj_amount = len((await self.session.execute(query)).scalars().all())
         if obj_amount == 0:
-            raise HTTPException(404, "No such object")
-        elif obj_amount > 1:
-            raise HTTPException(422, "Too much objects found")
+            raise ObjectNotFoundException
         stmt = delete(self.model).filter_by(**filter_by)
         await self.session.execute(stmt)
