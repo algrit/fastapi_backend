@@ -13,8 +13,8 @@ async def booking_add(db: DBDep, user_id: UserIdDep, data: BookingAddRequest):
     booking = BookingAdd(user_id=user_id, price=room.price, **data.model_dump())
     try:
         added_booking = await db.bookings.add_booking(booking)
-    except NoFreeRoomsException:
-        raise HTTPException(400, "Can't book this room. No free rooms for these dates")
+    except NoFreeRoomsException as ex:
+        raise HTTPException(409, ex.detail)
     await db.commit()
     return {"status": "OK", "data": added_booking}
 
