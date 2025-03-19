@@ -12,11 +12,7 @@ class RoomsRepository(BaseRepository):
     mapper = RoomDataMapper
 
     async def get_one(self, **filter_by):
-        query = (
-            select(RoomsORM)
-            .options(selectinload(RoomsORM.features))
-            .filter_by(**filter_by)
-        )
+        query = select(RoomsORM).options(selectinload(RoomsORM.features)).filter_by(**filter_by)
         result = await self.session.execute(query)
         model = result.scalars().one_or_none()
         if model is None:
@@ -28,6 +24,9 @@ class RoomsRepository(BaseRepository):
         query = (
             select(RoomsORM)
             .options(selectinload(RoomsORM.features))
-            .filter(RoomsORM.id.in_(rooms_ids_to_book)))
+            .filter(RoomsORM.id.in_(rooms_ids_to_book))
+        )
         result = await self.session.execute(query)
-        return [RoomWithRelsDataMapper.map_to_domain_entity(model) for model in result.scalars().all()]
+        return [
+            RoomWithRelsDataMapper.map_to_domain_entity(model) for model in result.scalars().all()
+        ]

@@ -16,24 +16,21 @@ def get_rooms_ids_to_book(date_from: date, date_to: date, hotel_id: int | None =
     rooms_left_cte = (
         select(
             RoomsORM.id.label("room_id"),
-            (RoomsORM.quantity - func.coalesce(booked_rooms_cte.c.booked_rooms_count, 0)).label("rooms_left"))
+            (RoomsORM.quantity - func.coalesce(booked_rooms_cte.c.booked_rooms_count, 0)).label(
+                "rooms_left"
+            ),
+        )
         .select_from(RoomsORM)
         .outerjoin(booked_rooms_cte)
         .cte(name="rooms_left_table")
     )
-    hotel_filtered_rooms = (
-        select(RoomsORM.id)
-        .select_from(RoomsORM)
-    )
+    hotel_filtered_rooms = select(RoomsORM.id).select_from(RoomsORM)
     if hotel_id is not None:
         hotel_filtered_rooms = hotel_filtered_rooms.filter_by(hotel_id=hotel_id)
 
-    rooms_ids = (
-        select(rooms_left_cte.c.room_id)
-        .filter(
-            rooms_left_cte.c.rooms_left > 0,
-            rooms_left_cte.c.room_id.in_(hotel_filtered_rooms),
-        )
+    rooms_ids = select(rooms_left_cte.c.room_id).filter(
+        rooms_left_cte.c.rooms_left > 0,
+        rooms_left_cte.c.room_id.in_(hotel_filtered_rooms),
     )
 
     return rooms_ids

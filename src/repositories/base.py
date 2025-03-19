@@ -11,7 +11,9 @@ class BaseRepository:
     def __init__(self, session):
         self.session = session
 
-    async def get_filtered(self, *filter, limit: int | None = None, offset: int | None = None, **filter_by):
+    async def get_filtered(
+        self, *filter, limit: int | None = None, offset: int | None = None, **filter_by
+    ):
         query = select(self.model).filter(*filter).filter_by(**filter_by)
         if limit:
             query = query.limit(limit).offset(offset)
@@ -40,9 +42,11 @@ class BaseRepository:
         await self.session.execute(add_data_stmt)
 
     async def edit(self, data: BaseModel, exclude_unset=False, **filter_by) -> None:
-        edit_data_stmt = (update(self.model)
-                          .filter_by(**filter_by)
-                          .values(**data.model_dump(exclude_unset=exclude_unset)))
+        edit_data_stmt = (
+            update(self.model)
+            .filter_by(**filter_by)
+            .values(**data.model_dump(exclude_unset=exclude_unset))
+        )
         await self.session.execute(edit_data_stmt)
 
     async def delete(self, **filter_by) -> None:

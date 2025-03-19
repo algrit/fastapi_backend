@@ -5,14 +5,14 @@ from pydantic import BaseModel
 
 
 class HotelAdd(BaseModel):
-	title: Annotated[str, Body()]
-	location: Annotated[str, Body()]
+    title: Annotated[str, Body()]
+    location: Annotated[str, Body()]
 
 
 class Hotel(HotelAdd):
-	id: int
+    id: int
 
 
 class HotelPatch(BaseModel):
-	title: Annotated[str | None, Body(None)]
-	location: Annotated[str | None, Body(None)]
+    title: Annotated[str | None, Body(None)]
+    location: Annotated[str | None, Body(None)]

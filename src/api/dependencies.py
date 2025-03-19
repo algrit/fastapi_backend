@@ -7,6 +7,7 @@ from src.database import async_session_maker
 from src.services.auth import AuthService
 from src.utils.db_manager import DBManager
 
+
 class PaginationParams(BaseModel):
     page: Annotated[int | None, Query(1, ge=1)]
     per_page: Annotated[int | None, Query(None, ge=1, le=30)]
