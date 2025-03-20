@@ -1,25 +1,29 @@
 from datetime import date
 from fastapi import APIRouter, Body, Query, HTTPException
 
-from src.schemas.features import RoomFeatureAdd
-from src.schemas.rooms import RoomAddRequest, RoomAdd, RoomPatch, RoomPatchRequest
+from src.schemas.rooms import RoomAddRequest, RoomPatchRequest
 from src.api.dependencies import DBDep
-from src.exceptions import ObjectNotFoundException, WrongDatesException, ForeignKeyViolationException
+from src.exceptions import (
+    ObjectNotFoundException,
+    WrongDatesException,
+    ForeignKeyViolationException,
+)
 from src.services.rooms import RoomService
 
 router = APIRouter(prefix="/hotels", tags=["Номера"])
 
 
-@router.get("/{hotel_id}/rooms",
-            summary="Получить свободные номера указанного отеля по дате")
+@router.get("/{hotel_id}/rooms", summary="Получить свободные номера указанного отеля по дате")
 async def rooms_get_by_date(
-        db: DBDep,
-        hotel_id: int,
-        date_from: date = Query(default="2024-12-20"),
-        date_to: date = Query(default="2024-12-30"),
+    db: DBDep,
+    hotel_id: int,
+    date_from: date = Query(default="2024-12-20"),
+    date_to: date = Query(default="2024-12-30"),
 ):
     try:
-        free_rooms = await RoomService(db).get_free_rooms_by_date_service(hotel_id, date_from, date_to)
+        free_rooms = await RoomService(db).get_free_rooms_by_date_service(
+            hotel_id, date_from, date_to
+        )
     except WrongDatesException as exc:
         raise HTTPException(422, exc.detail)
     except ObjectNotFoundException:
@@ -38,40 +42,40 @@ async def room_get_by_id(db: DBDep, hotel_id: int, room_id: int):
 
 @router.post("/{hotel_id}/rooms", summary="Добавить номера в отель")
 async def room_add(
-        db: DBDep,
-        hotel_id: int,
-        data: RoomAddRequest = Body(
-            openapi_examples={
-                "1": {
-                    "summary": "Luxe",
-                    "value": {
-                        "title": "Double Luxe",
-                        "description": "Very cool fancy room",
-                        "price": 100500,
-                        "quantity": 1,
-                    },
+    db: DBDep,
+    hotel_id: int,
+    data: RoomAddRequest = Body(
+        openapi_examples={
+            "1": {
+                "summary": "Luxe",
+                "value": {
+                    "title": "Double Luxe",
+                    "description": "Very cool fancy room",
+                    "price": 100500,
+                    "quantity": 1,
                 },
-                "2": {
-                    "summary": "Очередняра",
-                    "value": {
-                        "title": "Койка и туалет",
-                        "description": "Душ общий на этаж",
-                        "price": 15,
-                        "quantity": 80,
-                    },
+            },
+            "2": {
+                "summary": "Очередняра",
+                "value": {
+                    "title": "Койка и туалет",
+                    "description": "Душ общий на этаж",
+                    "price": 15,
+                    "quantity": 80,
                 },
-                "3": {
-                    "summary": "Президенсткий",
-                    "value": {
-                        "title": "PRESIDENT LUXE",
-                        "description": "FANCY",
-                        "price": 1000000,
-                        "quantity": 1,
-                        "features_ids": [2, 3],
-                    },
+            },
+            "3": {
+                "summary": "Президенсткий",
+                "value": {
+                    "title": "PRESIDENT LUXE",
+                    "description": "FANCY",
+                    "price": 1000000,
+                    "quantity": 1,
+                    "features_ids": [2, 3],
                 },
-            }
-        ),
+            },
+        }
+    ),
 ):
     try:
         added_room = await RoomService(db).room_add_service(hotel_id, data)

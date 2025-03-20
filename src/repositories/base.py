@@ -3,7 +3,11 @@ from sqlalchemy.exc import IntegrityError
 from pydantic import BaseModel
 from asyncpg.exceptions import UniqueViolationError, ForeignKeyViolationError
 
-from src.exceptions import ObjectNotFoundException, UniquenessViolationException, ForeignKeyViolationException
+from src.exceptions import (
+    ObjectNotFoundException,
+    UniquenessViolationException,
+    ForeignKeyViolationException,
+)
 
 
 class BaseRepository:
@@ -14,7 +18,7 @@ class BaseRepository:
         self.session = session
 
     async def get_filtered(
-            self, *filter, limit: int | None = None, offset: int | None = None, **filter_by
+        self, *filter, limit: int | None = None, offset: int | None = None, **filter_by
     ):
         query = select(self.model).filter(*filter).filter_by(**filter_by)
         if limit:

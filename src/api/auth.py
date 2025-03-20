@@ -15,33 +15,35 @@ async def register_user(data: UserAddRequest, db: DBDep):
     try:
         await db.users.add_one(new_user_data)
     except UniquenessViolationException:
-        raise HTTPException(409, "Пользователь с такой почтой уже существует. Используйте другую почту")
+        raise HTTPException(
+            409, "Пользователь с такой почтой уже существует. Используйте другую почту"
+        )
     await db.commit()
     return {"message": "OK"}
 
 
 @router.post("/login")
 async def login(
-        db: DBDep,
-        response: Response,
-        data: UserAddRequest = Body(
-            openapi_examples={
-                "1": {
-                    "summary": "algri",
-                    "value": {
-                        "email": "algri@example.com",
-                        "password": "2204",
-                    },
+    db: DBDep,
+    response: Response,
+    data: UserAddRequest = Body(
+        openapi_examples={
+            "1": {
+                "summary": "algri",
+                "value": {
+                    "email": "algri@example.com",
+                    "password": "2204",
                 },
-                "2": {
-                    "summary": "mama",
-                    "value": {
-                        "email": "mama@example.com",
-                        "password": "123",
-                    },
+            },
+            "2": {
+                "summary": "mama",
+                "value": {
+                    "email": "mama@example.com",
+                    "password": "123",
                 },
-            }
-        ),
+            },
+        }
+    ),
 ):
     user = await db.users.get_user_with_hashed_pass(email=data.email)
     if not user:

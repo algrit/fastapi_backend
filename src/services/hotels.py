@@ -7,13 +7,14 @@ from src.services.utils import DateChecker
 
 
 class HotelService(BaseService, DateChecker):
-    async def get_free_hotels_by_date_service(self,
-                                              pagination: PaginationDep,
-                                              date_from: date,
-                                              date_to: date,
-                                              title: str | None = None,
-                                              location: str | None = None,
-                                              ):
+    async def get_free_hotels_by_date_service(
+        self,
+        pagination: PaginationDep,
+        date_from: date,
+        date_to: date,
+        title: str | None = None,
+        location: str | None = None,
+    ):
         per_page = pagination.per_page or 5
         self.date_check(date_from=date_from, date_to=date_to)
         return await self.db.hotels.get_hotels_by_date(

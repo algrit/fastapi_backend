@@ -17,19 +17,17 @@ router = APIRouter(prefix="/hotels", tags=["Отели"])
 )
 @cache(expire=60)
 async def hotels_get_by_date(
-        db: DBDep,
-        pagination: PaginationDep,
-        date_from: date = Query(default="2024-12-20"),
-        date_to: date = Query(default="2024-12-30"),
-        title: str | None = None,
-        location: str | None = None,
+    db: DBDep,
+    pagination: PaginationDep,
+    date_from: date = Query(default="2024-12-20"),
+    date_to: date = Query(default="2024-12-30"),
+    title: str | None = None,
+    location: str | None = None,
 ):
     try:
-        free_hotels = await HotelService(db).get_free_hotels_by_date_service(pagination,
-                                                                             date_from,
-                                                                             date_to,
-                                                                             title,
-                                                                             location)
+        free_hotels = await HotelService(db).get_free_hotels_by_date_service(
+            pagination, date_from, date_to, title, location
+        )
     except WrongDatesException as exc:
         raise HTTPException(422, exc.detail)
     return {"free_hotels_for_these_dates": free_hotels}
@@ -45,25 +43,25 @@ async def hotel_get_by_id(db: DBDep, hotel_id: int):
 
 @router.post("", summary="Добавить отель")
 async def hotel_add(
-        db: DBDep,
-        hotel_data: HotelAdd = Body(
-            openapi_examples={
-                "1": {
-                    "summary": "Rome",
-                    "value": {
-                        "title": "Coliseum Five Stars",
-                        "location": "Rome, Italy",
-                    },
+    db: DBDep,
+    hotel_data: HotelAdd = Body(
+        openapi_examples={
+            "1": {
+                "summary": "Rome",
+                "value": {
+                    "title": "Coliseum Five Stars",
+                    "location": "Rome, Italy",
                 },
-                "2": {
-                    "summary": "Cuba",
-                    "value": {
-                        "title": "Marina Resort Spa",
-                        "location": "Varadero, Cuba",
-                    },
+            },
+            "2": {
+                "summary": "Cuba",
+                "value": {
+                    "title": "Marina Resort Spa",
+                    "location": "Varadero, Cuba",
                 },
-            }
-        ),
+            },
+        }
+    ),
 ):
     added_hotel = await HotelService(db).hotel_add_service(hotel_data)
     return {"status": "Hotel added", "data": added_hotel}
