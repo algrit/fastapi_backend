@@ -3,7 +3,7 @@ import pytest
 
 @pytest.mark.parametrize("room_id, date_from, date_to, status_code", [
 	(1, "2025-03-10", "2025-03-20", 200),
-	(1, "2025-03-10", "2025-03-20", 400),
+	(1, "2025-03-10", "2025-03-20", 409),
 	(1, "2025-03-02", "2025-03-05", 200),
 ])
 async def test_booking_add(db, authenticated_ac, room_id, date_from, date_to, status_code):
