@@ -6,15 +6,15 @@ class AppException(Exception):
 
 
 class ObjectNotFoundException(AppException):
-    detail = "Object not found"
-
-
-class DBException(AppException):
-    detail = "Some DB error"
+    detail = "Объект не найден"
 
 
 class UniquenessViolationException(AppException):
     detail = "Нарушение уникальности поля"
+
+
+class ForeignKeyViolationException(AppException):
+    detail = "Нарушение внешнего ключа"
 
 
 class WrongDatesException(AppException):

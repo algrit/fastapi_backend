@@ -1,9 +1,9 @@
 from sqlalchemy import select, insert, update, delete
 from sqlalchemy.exc import IntegrityError
 from pydantic import BaseModel
-from asyncpg.exceptions import UniqueViolationError
+from asyncpg.exceptions import UniqueViolationError, ForeignKeyViolationError
 
-from src.exceptions import ObjectNotFoundException, UniquenessViolationException
+from src.exceptions import ObjectNotFoundException, UniquenessViolationException, ForeignKeyViolationException
 
 
 class BaseRepository:
@@ -40,6 +40,8 @@ class BaseRepository:
         except IntegrityError as exc:
             if isinstance(exc.orig.__cause__, UniqueViolationError):
                 raise UniquenessViolationException from exc
+            elif isinstance(exc.orig.__cause__, ForeignKeyViolationError):
+                raise ForeignKeyViolationException from exc
             else:
                 raise exc
         model = result.scalars().one()
@@ -47,7 +49,15 @@ class BaseRepository:
 
     async def add_bulk(self, data: list[BaseModel]):
         add_data_stmt = insert(self.model).values([schema.model_dump() for schema in data])
-        await self.session.execute(add_data_stmt)
+        try:
+            await self.session.execute(add_data_stmt)
+        except IntegrityError as exc:
+            if isinstance(exc.orig.__cause__, UniqueViolationError):
+                raise UniquenessViolationException from exc
+            elif isinstance(exc.orig.__cause__, ForeignKeyViolationError):
+                raise ForeignKeyViolationException from exc
+            else:
+                raise exc
 
     async def edit(self, data: BaseModel, exclude_unset=False, **filter_by) -> None:
         model = await self.get_one(**filter_by)
