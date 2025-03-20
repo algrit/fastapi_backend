@@ -1,8 +1,9 @@
 from sqlalchemy import select, insert, update, delete
 from sqlalchemy.exc import IntegrityError
 from pydantic import BaseModel
+from asyncpg.exceptions import UniqueViolationError
 
-from src.exceptions import DBException, ObjectNotFoundException
+from src.exceptions import ObjectNotFoundException, UniquenessViolationException
 
 
 class BaseRepository:
@@ -36,8 +37,11 @@ class BaseRepository:
         add_data_stmt = insert(self.model).values(**data.model_dump()).returning(self.model)
         try:
             result = await self.session.execute(add_data_stmt)
-        except IntegrityError:
-            raise DBException
+        except IntegrityError as exc:
+            if isinstance(exc.orig.__cause__, UniqueViolationError):
+                raise UniquenessViolationException from exc
+            else:
+                raise exc
         model = result.scalars().one()
         return self.mapper.map_to_domain_entity(model)
 

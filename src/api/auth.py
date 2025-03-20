@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException, Response, Body
 
-from src.exceptions import DBException
+from src.exceptions import UniquenessViolationException
 from src.schemas.users import UserAddRequest, UserAdd
 from src.services.auth import AuthService
 from src.api.dependencies import UserIdDep, DBDep
@@ -14,8 +14,8 @@ async def register_user(data: UserAddRequest, db: DBDep):
     new_user_data = UserAdd(email=data.email, hashed_password=hashed_password)
     try:
         await db.users.add_one(new_user_data)
-    except DBException:
-        raise HTTPException(409, "Already has this user. Use another email")
+    except UniquenessViolationException:
+        raise HTTPException(409, "Пользователь с такой почтой уже существует. Используйте другую почту")
     await db.commit()
     return {"message": "OK"}
 

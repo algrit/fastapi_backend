@@ -13,6 +13,13 @@ class DBException(AppException):
     detail = "Some DB error"
 
 
+class UniquenessViolationException(AppException):
+    detail = "Нарушение уникальности поля"
+
+
+class WrongDatesException(AppException):
+    detail = "Дата выезда должна быть позже даты заезда"
+
+
 class NoFreeRoomsException(AppException):
     detail = "Can't book this room. No free rooms for these dates"
-
