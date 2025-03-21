@@ -23,3 +23,7 @@ class WrongDatesException(AppException):
 
 class NoFreeRoomsException(AppException):
     detail = "Can't book this room. No free rooms for these dates"
+
+
+class WrongPassword(AppException):
+    detail = "Неверный пароль"
