@@ -22,7 +22,7 @@ class WrongDatesException(AppException):
 
 
 class NoFreeRoomsException(AppException):
-    detail = "Can't book this room. No free rooms for these dates"
+    detail = "Невозможно забронировать. Номер занят на указанные даты"
 
 
 class WrongPassword(AppException):

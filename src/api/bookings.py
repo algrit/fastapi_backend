@@ -1,36 +1,35 @@
 from fastapi import APIRouter, HTTPException
 
 from src.api.dependencies import DBDep, UserIdDep
-from src.exceptions import NoFreeRoomsException
-from src.schemas.bookings import BookingAddRequest, BookingAdd
+from src.exceptions import NoFreeRoomsException, WrongDatesException, ObjectNotFoundException
+from src.schemas.bookings import BookingAddRequest
+from src.services.bookings import BookingService
 
 router = APIRouter(prefix="/bookings", tags=["Бронирования"])
 
 
 @router.post("", summary="Забронировать номер в отеле")
 async def booking_add(db: DBDep, user_id: UserIdDep, data: BookingAddRequest):
-    room = await db.rooms.get_one(id=data.room_id)
-    booking = BookingAdd(user_id=user_id, price=room.price, **data.model_dump())
     try:
-        added_booking = await db.bookings.add_booking(booking)
-    except NoFreeRoomsException as ex:
-        raise HTTPException(409, ex.detail)
-    await db.commit()
-    return {"status": "OK", "data": added_booking}
-
-
-@router.get("", summary="Получить все бронирования")
-async def bookings_get_all(db: DBDep):
-    return await db.bookings.get_all()
+        added_booking = await BookingService(db).booking_add_service(user_id, data)
+    except WrongDatesException as exc:
+        raise HTTPException(422, exc.detail)
+    except NoFreeRoomsException as exc:
+        raise HTTPException(409, exc.detail)
+    except ObjectNotFoundException:
+        raise HTTPException(404, "Номер не найден")
+    return {"status": "Booking added", "data": added_booking}
 
 
 @router.get("/me", summary="Получить мое бронирование")
 async def bookings_get_mine(db: DBDep, user_id: UserIdDep):
-    return await db.bookings.get_filtered(user_id=user_id)
+    return await BookingService(db).bookings_get_mine_service(user_id)
 
 
 @router.delete("/me/delete/{booking_id}", summary="Отменить мое бронирование")
 async def booking_delete(db: DBDep, user_id: UserIdDep, booking_id: int):
-    await db.bookings.delete(user_id=user_id, id=booking_id)
-    await db.commit()
+    try:
+        await BookingService(db).booking_delete_service(user_id, booking_id)
+    except ObjectNotFoundException:
+        raise HTTPException(404, "Бронирование не найдено")
     return {"status": "deleted"}
