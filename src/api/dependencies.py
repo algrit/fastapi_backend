@@ -24,7 +24,7 @@ def get_token(request: Request):
 
 
 def get_current_user_id(access_token: str = Depends(get_token)):
-    return AuthService().decode_jwt_token(access_token)
+    return AuthService.decode_jwt_token(access_token)
 
 
 UserIdDep = Annotated[int, Depends(get_current_user_id)]

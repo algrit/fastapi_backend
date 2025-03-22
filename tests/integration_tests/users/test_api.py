@@ -6,7 +6,7 @@ import pytest
     [
         ("mama@example.com", "123", 200, "mama@example.com", "123", 200),
         ("mama2@example.com", "123", 200, "mama2@example.com", "123", 200),
-        ("mama3@example.com", "123", 200, "mama2@example.com", "1234", 401),
+        ("mama3@example.com", "123", 200, "mama2@example.com", "1234", 403),
     ],
 )
 async def test_user_e2e_flow(

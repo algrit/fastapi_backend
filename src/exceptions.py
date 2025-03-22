@@ -27,3 +27,7 @@ class NoFreeRoomsException(AppException):
 
 class WrongPassword(AppException):
     detail = "Неверный пароль"
+
+
+class WrongAccessKey(AppException):
+    detail = "Неверный ключ доступа"

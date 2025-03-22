@@ -4,7 +4,7 @@ import bcrypt
 import jwt
 
 from src.config import settings
-from src.exceptions import ObjectNotFoundException, WrongPassword
+from src.exceptions import ObjectNotFoundException, WrongPassword, WrongAccessKey
 from src.schemas.users import UserAddRequest, UserAdd
 from src.services.base import BaseService
 
@@ -24,10 +24,24 @@ class AuthService(BaseService):
     @staticmethod
     def create_jwt_token(data: dict) -> str:
         to_encode = data.copy()
-        expire = datetime.now(timezone.utc) + timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
+        expire = datetime.now(timezone.utc) + timedelta(
+            minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES
+        )
         to_encode.update({"exp": expire})
-        encoded_jwt = jwt.encode(to_encode, settings.JWT_SECRET_KEY, algorithm=settings.JWT_ALGORITHM)
+        encoded_jwt = jwt.encode(
+            to_encode, settings.JWT_SECRET_KEY, algorithm=settings.JWT_ALGORITHM
+        )
         return encoded_jwt
+
+    @staticmethod
+    def decode_jwt_token(encoded_jwt):
+        try:
+            data = jwt.decode(
+                encoded_jwt, key=settings.JWT_SECRET_KEY, algorithms=[settings.JWT_ALGORITHM]
+            )
+        except jwt.exceptions.InvalidSignatureError:
+            raise WrongAccessKey
+        return data["id"]
 
     async def register_user_service(self, data: UserAddRequest):
         hashed_password = self.hash_password(data.password)
@@ -45,9 +59,5 @@ class AuthService(BaseService):
         access_token = self.create_jwt_token({"id": user.id})
         return access_token
 
-    @staticmethod
-    def decode_jwt_token(token: str) -> int:
-        user_id = jwt.decode(token, key=settings.JWT_SECRET_KEY, algorithms=settings.JWT_ALGORITHM)[
-            "id"
-        ]
-        return user_id
+    async def get_me_service(self, user_id: int):
+        return await self.db.users.get_one(id=user_id)
