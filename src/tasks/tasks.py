@@ -1,5 +1,7 @@
 import asyncio
 import os
+from asyncio import sleep
+
 from PIL import Image
 
 from src.database import async_session_maker_null_pool
@@ -35,6 +37,12 @@ def resize_image(image_path: str):
         # Сохраняем изображение
         img_resized.save(output_path)
     print(f"Изображение сохранено в следующих размерах: {sizes} в папке {output_folder}")
+
+
+@celery_instance.task
+def test_celery():
+    sleep(2)
+    print("СЕЛЕРУ РАБОТАЕТ")
 
 
 async def send_email_to_users_with_today_checkin_helper():

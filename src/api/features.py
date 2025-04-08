@@ -5,12 +5,15 @@ from src.api.dependencies import DBDep
 from src.schemas.features import FeatureAdd
 from src.services.features import FeatureService
 
+from src.tasks.tasks import test_celery
+
 router = APIRouter(prefix="/features", tags=["Удобства номера"])
 
 
 @router.get("", summary="Получить все удобства")
 @cache(expire=180)
 async def features_get(db: DBDep):
+    test_celery.delay()
     return await FeatureService(db).features_get_service()
 
 
