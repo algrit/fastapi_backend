@@ -1,6 +1,6 @@
+from time import sleep
 import asyncio
 import os
-from asyncio import sleep
 
 from PIL import Image
 
@@ -9,7 +9,7 @@ from src.tasks.celery_app import celery_instance
 from src.utils.db_manager import DBManager
 
 
-# @celery_instance.task
+@celery_instance.task
 def resize_image(image_path: str):
     sizes = [1000, 500, 200]
     output_folder = "src/static/images"
