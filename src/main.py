@@ -10,7 +10,7 @@ import uvicorn
 
 sys.path.append(str(Path(__file__).parent.parent))
 
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.DEBUG)
 
 from src.init import redis_manager
 
@@ -24,8 +24,10 @@ from src.api.images import router as images_router
 
 @asynccontextmanager
 async def lifespan(_: FastAPI):
+    logging.info("FastAPI Cache trying to connect")
     await redis_manager.connect()
     FastAPICache.init(RedisBackend(redis_manager.redis), prefix="fastapi-cache")
+    logging.info("FastAPI Cache initialized")
     yield
     await redis_manager.close()
 
