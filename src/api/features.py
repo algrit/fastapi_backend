@@ -11,7 +11,7 @@ router = APIRouter(prefix="/features", tags=["Удобства номера"])
 
 
 @router.get("", summary="Получить все удобства")
-@cache(expire=180)
+@cache(expire=30)
 async def features_get(db: DBDep):
     test_celery.delay()
     return await FeatureService(db).features_get_service()
