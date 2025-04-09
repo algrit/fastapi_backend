@@ -3,4 +3,5 @@
 __pycache__
 .env
 .test.env
+COMMANDS.md
 src/static/images/
