@@ -18,7 +18,7 @@ services:
       - booking_network
     env_file:
       - .env
-    command: "celery --app=src.tasks.celery_app:celery_instance beat -l INFO"
+    command: "celery --app=src.tasks.celery_app:celery_instance worker -l INFO"
 
 
   booking_celery_beat_service:
@@ -29,7 +29,7 @@ services:
       - booking_network
     env_file:
       - .env
-    command: "celery --app=src.tasks.celery_app:celery_instance worker -l INFO"
+    command: "celery --app=src.tasks.celery_app:celery_instance beat -l INFO"
 
 networks:
   booking_network:
